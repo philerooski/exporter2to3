@@ -1,5 +1,6 @@
 """
-Submit new data to the exporter 3.0 mock project
+Submit new data to the exporter 3.0 mock project. References an entity view so
+that files which have already been exported are not reexported.
 """
 
 import synapseclient
@@ -62,9 +63,12 @@ def copy_table_data(syn, source_table, data_folder,
         record_ids, limit, file_handle_field):
     record_ids_str = "','".join(record_ids)
     record_ids_str = f"('{record_ids_str}')"
-    query_str = (
-            f"SELECT * FROM {source_table} where recordId IN {record_ids_str}"
-            f"LIMIT {limit}")
+    if len(record_ids) > 1:
+        query_str = f"SELECT * FROM {source_table} where recordId IN {record_ids_str} "
+        if limit is not None:
+                query_str = f"{query_str} LIMIT {limit}"
+    else:
+        return None
     q = syn.tableQuery(query_str)
     file_handles = syn.downloadTableColumns(q, file_handle_field)
     source_df = q.asDataFrame()
