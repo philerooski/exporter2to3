@@ -34,7 +34,8 @@ def read_args():
             default="rawData")
     parser.add_argument(
             "--dry-run",
-            help="Do not move any data.")
+            help="Do not move any data.",
+            action="store_true")
     args = parser.parse_args()
     return(args)
 
@@ -93,11 +94,12 @@ def copy_data_(syn, s3_client, source_table, data_folder,
                 "dayInStudy": str(r["dayInStudy"]),
                 "taskIdentifier": str(r["metadata.taskIdentifier"]),
                 "assessmentId": str(r["metadata.taskIdentifier"]),
-                "dataType": str(r["dataType"]),
                 "substudyMemberships": str(r["substudyMemberships"]),
                 "dataGroups": str(r["dataGroups"]),
                 "uploadedOn": uploaded_on,
                 "appVersion": str(r["appVersion"])}
+        if "dataType" in r.keys():
+            annotations["dataType"] = str(r["dataType"])
         f = synapseclient.File(
             path = r["path"],
             parent = parent_folder,
@@ -126,7 +128,7 @@ def main():
         target_folder = args.data_folder,
         exclude_tables = args.exclude_tables,
         query_str = args.query_str,
-        file_handle_field = args.file_handle_field
+        file_handle_field = args.file_handle_field,
         dry_run = args.dry_run)
 
 if __name__ == "__main__":
